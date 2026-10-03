@@ -1,20 +1,46 @@
-    - name: Checkout code
-      uses: actions/checkout@v4
+name: Build muyynguyen iOS App
 
-    - name: Cai dat XcodeGen
-      run: brew install xcodegen
+on:
+  push:
+    branches: ["main", "master"]
+  workflow_dispatch:
 
-    - name: Tao Xcode Project
-      run: xcodegen generate
+jobs:
+  build:
+    runs-on: macos-14
 
-    - name: Build Ung dung
-      run: |
-        xcodebuild -project muyynguyen.xcodeproj \
-          -scheme muyynguyen \
-          -sdk iphoneos \
-          -configuration Release \
-          -derivedDataPath ./build \
-          CODE_SIGNING_ALLOWED=NO \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGN_IDENTITY="" \
-          build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Cai dat XcodeGen
+        run: brew install xcodegen
+
+      - name: Tao Xcode Project
+        run: xcodegen generate
+
+      - name: Build Ung dung
+        run: |
+          xcodebuild -project muyynguyen.xcodeproj \
+            -scheme muyynguyen \
+            -sdk iphoneos \
+            -configuration Release \
+            -derivedDataPath ./build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build
+
+      - name: Dong goi thanh file .IPA
+        run: |
+          mkdir -p Payload
+          cp -r build/Build/Products/Release-iphoneos/muyynguyen.app Payload/
+          zip -r muyynguyen.ipa Payload
+          rm -rf Payload
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: muyynguyen-release-ipa
+          path: muyynguyen.ipa
+          retention-days: 7

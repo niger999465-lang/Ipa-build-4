@@ -13,6 +13,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Liet ke Xcode co san
+        run: ls /Applications | grep Xcode
+
+      - name: Chon Xcode moi nhat
+        run: |
+          LATEST_XCODE=$(ls -d /Applications/Xcode_*.app | sort -V | tail -n 1)
+          echo "Dang chon: $LATEST_XCODE"
+          sudo xcode-select -s "$LATEST_XCODE"
+          xcodebuild -version
+
       - name: Cai dat XcodeGen
         run: brew install xcodegen
 
